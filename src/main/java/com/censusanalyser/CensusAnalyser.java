@@ -6,7 +6,6 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.stream.StreamSupport;
@@ -24,7 +23,12 @@ public class CensusAnalyser {
             int numOfEntries = (int) StreamSupport.stream(censusCSVIterable.spliterator(), false).count();
             return numOfEntries;
         } catch (RuntimeException e){
-            throw new CensusAnalyserException(e.getMessage(),CensusAnalyserException.ExceptionType.INCORRECT_FILE_TYPE);
+            if(e.getCause().toString().contains("CsvDataTypeMismatchException")) {
+                throw new CensusAnalyserException(e.getMessage(), CensusAnalyserException.ExceptionType.CSV_FILE_ISSUE);
+            }
+            else {
+                throw new CensusAnalyserException(e.getMessage(), CensusAnalyserException.ExceptionType.INCORRECT_FILE_TYPE);
+            }
         } catch (IOException e){
             throw new CensusAnalyserException(e.getMessage(),CensusAnalyserException.ExceptionType.FILE_NOT_FOUND);
         }
